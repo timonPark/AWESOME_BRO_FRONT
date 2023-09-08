@@ -2,7 +2,12 @@ import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import KakaoProvider from "next-auth/providers/kakao";
 import NaverProvider from "next-auth/providers/naver";
+import GoogleProvider from "next-auth/providers/google";
 import { env } from "process";
+import {LOCATOR, Post} from "@/app/utils/axios";
+import {SocialUser} from "@/app/types/user/user.type";
+import {JWT} from "next-auth/jwt";
+import {Account} from "next-auth";
 
 type NextAuthTokenType =
   | {
@@ -15,6 +20,16 @@ type NextAuthTokenType =
       jti: string;
     }
   | undefined;
+
+const createSocialUser = (token:JWT, account: Account) =>
+  ({
+    name: token.name,
+    email: token.email,
+    nickname: token.name,
+    loginType: account.provider,
+    socialId: account.providerAccountId,
+    profilePicture: token.picture
+  })
 
 const handler = NextAuth({
   providers: [
@@ -58,19 +73,25 @@ const handler = NextAuth({
         ? process.env.NAVER_CLIENT_SECRET
         : "",
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID ? process.env.GOOGLE_CLIENT_ID : "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET
+        ? process.env.GOOGLE_CLIENT_SECRET
+        : "",
+    }),
   ],
   callbacks: {
-    async jwt({ token }) {
-      if (token) {
-        console.log(token.email);
-        console.log(token.name);
-        console.log(token.picture);
-        console.log(token.sub);
+    async jwt({ token, account}) {
+      if (account) {
+        const result = await Post(LOCATOR.backend + '/user/social', createSocialUser(token, account))
+        token['id'] = result.data.data;
+        token['loginType'] = account.provider;
       }
       return token;
     },
-    async session({ session }) {
-      console.log(`session: ${JSON.stringify(session)}`);
+    async session({ session, token, user}) {
+      session['userId'] = token['id'];
+      session['loginType'] = token['loginType']
       return session;
     },
   },

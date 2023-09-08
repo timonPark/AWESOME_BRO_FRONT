@@ -3,26 +3,13 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import React from "react";
 import { useRouter } from "next/navigation";
 
-const imageToLoginType = (image: string | undefined | null) => {
-  if (!image) {
-    return "regular";
-  }
-  if (image.includes("pstatic.net")) {
-    return "naver";
-  }
-  if (image.includes("kakaocdn.net")) {
-    return "kakao";
-  }
-  return "regular";
-};
-
 function SignInButton() {
   const { data: session } = useSession();
+  const loginType  = session ? session['loginType'] : '';
+
   const { push } = useRouter();
-  const image = session?.user?.image;
-  const loginType = imageToLoginType(image);
   console.log(`session: ${JSON.stringify(session)}`);
-  if (session && session.user) {
+  if (session && session?.user) {
     return (
       <button
         className="px-12 py-4 border rounded-xl bg-red-300"
@@ -52,7 +39,7 @@ function SignInButton() {
   }
   if (session !== undefined) {
     // 세션이 로딩 중일 때의 상태를 처리합니다
-    push("api/auth/signin");
+    signIn();
   }
   if (session === undefined) {
     // 세션이 로딩 중일 때의 상태를 처리합니다
