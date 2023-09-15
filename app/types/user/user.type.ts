@@ -1,8 +1,8 @@
-export type SocialUser = {
+export type UserDto = {
   "name" :string,
   "email": string,
   "nickname": string,
-  "loginType": "regular" | "naver" | "kakao",
+  "loginType": string | null,
   "socialId": string,
   "profilePicture": string | null
-}
+};

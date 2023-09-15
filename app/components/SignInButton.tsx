@@ -1,18 +1,15 @@
 "use client";
 import { signIn, signOut, useSession } from "next-auth/react";
 import React from "react";
-import { useRouter } from "next/navigation";
 
 function SignInButton() {
   const { data: session } = useSession();
   const loginType  = session ? session['loginType'] : '';
-
-  const { push } = useRouter();
-  console.log(`session: ${JSON.stringify(session)}`);
+  console.log(`session: ${JSON.stringify(session)}`)
   if (session && session?.user) {
     return (
       <button
-        className="px-12 py-4 border rounded-xl bg-red-300"
+        className="px-12 py-4 border rounded-xl"
         onClick={() => signOut()}
       >
         <div className="float-left">
@@ -28,6 +25,8 @@ function SignInButton() {
                   ? "/icon/naver.png"
                   : loginType === "kakao"
                   ? "/icon/kakao.png"
+                  : loginType === "google"
+                  ? "/icon/google.png"
                   : ""
               }
             ></input>
