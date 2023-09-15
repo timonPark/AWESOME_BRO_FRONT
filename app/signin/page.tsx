@@ -8,6 +8,7 @@ function Login() {
   useEffect(() => {
     (async () => {
       const res: any = await getProviders();
+      console.log(`ressss`);
       console.log(res);
       setProviders(res);
     })();
